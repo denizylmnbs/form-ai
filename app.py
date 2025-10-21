@@ -18,10 +18,7 @@ async def evaluate_candidate(request: Request):
     about = payload.get("about")
     cv = payload.get("cv") or {}
 
-    cv_name = cv.get("name")
-    cv_link = cv.get("webViewLink")
-
-    print(f"Evaluating candidate: {full_name}, Email: {email}, CV: {cv_name}, Link: {cv_link}, Technologies: {technologies}, About: {about}")
+    print(f"Evaluating candidate: {full_name}, Email: {email}, CV: {cv}, Link: {cv_link}, Technologies: {technologies}, About: {about}")
 
     # API cevap dönmek zorunda
     return {"status": "ok", "received": payload}
