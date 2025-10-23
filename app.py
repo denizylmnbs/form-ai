@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 # load_dotenv()  # Load environment variables from .env file
 app = FastAPI()
 
-import io
+from io import BytesIO
+import mammoth
 import re
 import requests
 from docx import Document  # pip install python-docx
@@ -17,61 +18,23 @@ def drive_open_link_to_direct(url: str) -> str:
     if not m:
         raise ValueError("Geçersiz Drive open?id=... linki")
     file_id = m.group(1)
-    return f"https://drive.google.com/uc?export=download&id={file_id}"
+    return f"https://docs.google.com/document/d/{file_id}/export?format=docx"
 
-def fetch_drive_bytes(url: str) -> bytes:
-    """
-    Büyük dosyalarda Drive 'confirm' çerezini ister; bunu da ele alıyoruz.
-    """
-    s = requests.Session()
-    r = s.get(url, stream=True)
-    # confirm token kontrolü
-    for k, v in r.cookies.items():
-        if k.startswith('download_warning'):
-            # token yakalandı → yeniden iste
-            r = s.get(url + f"&confirm={v}", stream=True)
-            break
-    r.raise_for_status()
-    return r.content
+def docx_to_text_mammoth(url: str) -> str:
+    # 1) DOCX baytlarını belleğe çek
+    resp = requests.get(url, timeout=30)
+    resp.raise_for_status()
+    data = BytesIO(resp.content)
+    print(data)
 
-def docx_text_from_bytes(docx_bytes: bytes) -> str:
-    """
-    Basit, hızlı çıkarım: paragraflar + tablolar.
-    İstersen Mammoth ile daha 'temiz' metin alabilirsin (bkz. altta).
-    """
-    file_like = io.BytesIO(docx_bytes)
-    doc = Document(file_like)
+    # 2) Mammoth ile raw text çıkar
+    result = mammoth.extract_raw_text(data)  # .value = str
+    text = result.value or ""
 
-    chunks = []
-
-    # Paragraflar
-    for p in doc.paragraphs:
-        if p.text.strip():
-            chunks.append(p.text)
-
-    # Tablolar
-    for table in doc.tables:
-        for row in table.rows:
-            cells = [cell.text.strip() for cell in row.cells]
-            if any(cells):
-                chunks.append(" | ".join(cells))
-
-    # (İsteğe bağlı) header/footer:
-    # for section in doc.sections:
-    #     if section.header and section.header.paragraphs:
-    #         chunks.append("[HEADER] " + " ".join(p.text for p in section.header.paragraphs if p.text.strip()))
-    #     if section.footer and section.footer.paragraphs:
-    #         chunks.append("[FOOTER] " + " ".join(p.text for p in section.footer.paragraphs if p.text.strip()))
-
-    text = "\n".join(chunks)
-    # Fazla boşlukları sadeleştir
-    text = re.sub(r'\n{3,}', '\n\n', text).strip()
+    # 3) Basit temizlik: fazla boşlukları sadeleştir
+    # İkiden fazla boş satırı teke indir, sağ/sol boşlukları temizle
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
     return text
-
-def read_docx_text_from_drive_open_link(open_link: str) -> str:
-    direct = drive_open_link_to_direct(open_link)
-    blob = fetch_drive_bytes(direct)
-    return docx_text_from_bytes(blob)
 
 
 @app.get("/health")
@@ -88,7 +51,7 @@ async def evaluate_candidate(request: Request):
     about = payload.get("about")
     cv = payload.get("cv")
 
-    text = read_docx_text_from_drive_open_link(cv)
+    cv_content = docx_to_text_mammoth(drive_open_link_to_direct(cv))
 
     # API cevap dönmek zorunda
-    return {"status": "ok", "received": text}
+    return {"status": "ok", "message": f"{cv_content}"}
