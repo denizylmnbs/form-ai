@@ -61,7 +61,11 @@ async def evaluate_candidate(request: Request):
         "about": about,
         "cv": cv_content
     }
-
-    # API cevap dönmek zorunda
+    
     resp = ai_eval(payload)
-    return {"status": "ok", "message": f"{resp}"}
+    return {"score": resp["score"],
+            "strengths": resp["strengths"],
+            "risks": resp["risks"],
+            "justification": resp["justification"],
+            "recommendation": resp["recommendation"]
+            }
