@@ -1,16 +1,17 @@
 from fastapi import FastAPI, Request
-from dotenv import load_dotenv
 from main import ai_eval
 
-# load_dotenv()  # Load environment variables from .env file
 app = FastAPI()
 
+from dotenv import load_dotenv
 import json
 from io import BytesIO
 import mammoth
 import re
 import requests
-from docx import Document  # pip install python-docx
+
+load_dotenv()  # Load environment variables from .env file
+
 
 def drive_open_link_to_direct(url: str) -> str:
     """
@@ -27,7 +28,6 @@ def docx_to_text_mammoth(url: str) -> str:
     resp = requests.get(url, timeout=30)
     resp.raise_for_status()
     data = BytesIO(resp.content)
-    print(data)
 
     # 2) Mammoth ile raw text çıkar
     result = mammoth.extract_raw_text(data)  # .value = str
@@ -64,7 +64,7 @@ async def evaluate_candidate(request: Request):
     }
 
     resp = ai_eval(payload)
-    data = json.loads(resp)
+    data = json.loads(resp.strip())
     return {
             "score": data["score"],
             "strengths": data["strengths"],

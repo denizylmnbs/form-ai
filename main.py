@@ -1,8 +1,8 @@
 from openai import OpenAI
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # Load environment variables from .env file
 
 def ai_eval(payload):
     api_key = os.getenv("OPENAI_SECRET_KEY")
