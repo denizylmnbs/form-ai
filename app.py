@@ -5,6 +5,7 @@ from main import ai_eval
 # load_dotenv()  # Load environment variables from .env file
 app = FastAPI()
 
+import json
 from io import BytesIO
 import mammoth
 import re
@@ -61,11 +62,13 @@ async def evaluate_candidate(request: Request):
         "about": about,
         "cv": cv_content
     }
-    
+
     resp = ai_eval(payload)
-    return {"score": resp["score"],
-            "strengths": resp["strengths"],
-            "risks": resp["risks"],
-            "justification": resp["justification"],
-            "recommendation": resp["recommendation"]
+    data = json.loads(resp)
+    return {
+            "score": data["score"],
+            "strengths": data["strengths"],
+            "risks": data["risks"],
+            "justification": data["justification"],
+            "recommendation": data["recommendation"]
             }
