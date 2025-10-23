@@ -64,6 +64,7 @@ async def evaluate_candidate(request: Request):
     }
 
     resp = ai_eval(payload)
+    print(resp)
     data = json.loads(resp.strip())
     return {
             "score": data["score"],

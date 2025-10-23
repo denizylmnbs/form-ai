@@ -44,7 +44,7 @@ def ai_eval(payload):
 
         İhtiyacımız olan: Öğrenmeye hevesli, işe koyulmaktan çekinmeyen ve yapay zeka otomasyon araçları konusunda heyecan duyan biri.
 
-        Your output should be JSON format like this:
+        Your output should be JSON format like this. Definetely follow this format DO NOT ADD ANY EXTRA EXPLANATIONS OR TEXT:
         {
             "score": integer number between 0-100,
             "strengths": [list of strengths of candidate],    
