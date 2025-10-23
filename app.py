@@ -47,11 +47,11 @@ def health():
 async def evaluate_candidate(request: Request):
     payload = await request.json()  # <-- await önemli!
 
-    full_name = payload.get("full_name")
-    email = payload.get("email")
-    technologies = payload.get("technologies")
-    about = payload.get("about")
-    cv = payload.get("cv")
+    full_name = str(payload.get("full_name"))
+    email = str(payload.get("email"))
+    technologies = str(payload.get("technologies"))
+    about = str(payload.get("about"))
+    cv = str(payload.get("cv"))
 
     cv_content = docx_to_text_mammoth(drive_open_link_to_direct(cv))
 
