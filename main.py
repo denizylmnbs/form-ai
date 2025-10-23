@@ -3,54 +3,56 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-api_key = os.getenv("OPENAI_SECRET_KEY")
 
-client = OpenAI(api_key=api_key)
+def ai_eval(payload):
+    api_key = os.getenv("OPENAI_SECRET_KEY")
 
-response = client.responses.create(
-    model="gpt-4o-mini",
-    instructions="""
-    You are a human resources artificial intelligence assistant. 
-    Your task is evaluate candidates which applied for internship positions.
-    Provide clear and concise answers to the questions asked by the candidates.
-    You need to evaluate the candidates based on our criteria.
-    
-    Criteria:
-    Ekibimize katılacak meraklı bir öğrenciler arıyoruz!
+    client = OpenAI(api_key=api_key)
 
-    Aradığımız özellikler:
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        instructions="""
+        You are a human resources artificial intelligence assistant. 
+        Your task is evaluate candidates which applied for internship positions.
+        Provide clear and concise answers to the questions asked by the candidates.
+        You need to evaluate the candidates based on our criteria.
+        
+        Criteria:
+        Ekibimize katılacak meraklı bir öğrenciler arıyoruz!
 
-    • REST API'lerinin ne olduğunu bilen
+        Aradığımız özellikler:
 
-    • LLM'ler (OpenAI, Claude) ile denemeler yapmış
+        • REST API'lerinin ne olduğunu bilen
 
-    • Tercihen Bilgisayar Mühendisliği veya Elektrik-Elektronik Mühendisliği bölümlerinden
+        • LLM'ler (OpenAI, Claude) ile denemeler yapmış
 
-    • Agentic AI ve MCP konularını merak eden
+        • Tercihen Bilgisayar Mühendisliği veya Elektrik-Elektronik Mühendisliği bölümlerinden
 
-    Aşağıdaki araçları kullandiysaniz bonus:
+        • Agentic AI ve MCP konularını merak eden
 
-    • n8n, Zapier, Make
+        Aşağıdaki araçları kullandiysaniz bonus:
 
-    • Apify
+        • n8n, Zapier, Make
 
-    • OpenAI, Anthropic
+        • Apify
 
-    • Lovable, Cursor
+        • OpenAI, Anthropic
 
-    İhtiyacımız olan: Öğrenmeye hevesli, işe koyulmaktan çekinmeyen ve yapay zeka otomasyon araçları konusunda heyecan duyan biri.
+        • Lovable, Cursor
 
-    Your output should be JSON format like this:
-    {
-        "score": integer number between 0-100,
-        "strengths": [list of strengths of candidate],    
-        "risks": [list of risks of candidate],
-        "justification": "detailed justification of the score given"
-        "recommendation": "Evet or Belki or Hayır"
-    }
+        İhtiyacımız olan: Öğrenmeye hevesli, işe koyulmaktan çekinmeyen ve yapay zeka otomasyon araçları konusunda heyecan duyan biri.
 
-    """,
-    input="Evaluate the candidate according to the following responses and CV:\n\n",
-)
+        Your output should be JSON format like this:
+        {
+            "score": integer number between 0-100,
+            "strengths": [list of strengths of candidate],    
+            "risks": [list of risks of candidate],
+            "justification": "detailed justification of the score given"
+            "recommendation": "Evet or Belki or Hayır"
+        }
 
-print(response.output_text)
+        """,
+        input= f"Evaluate the candidate according to the following responses and CV:\n\n{payload}",
+    )
+
+    return response.output_text

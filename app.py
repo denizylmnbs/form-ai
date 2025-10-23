@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
+from main import ai_eval
 
 # load_dotenv()  # Load environment variables from .env file
 app = FastAPI()
@@ -53,5 +54,14 @@ async def evaluate_candidate(request: Request):
 
     cv_content = docx_to_text_mammoth(drive_open_link_to_direct(cv))
 
+    payload = {
+        "full_name": full_name,
+        "email": email,
+        "technologies": technologies,
+        "about": about,
+        "cv": cv_content
+    }
+
     # API cevap dönmek zorunda
-    return {"status": "ok", "message": f"{cv_content}"}
+    resp = ai_eval(payload)
+    return {"status": "ok", "message": f"{resp}"}
